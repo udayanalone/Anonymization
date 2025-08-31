@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Data Anonymization System - CGAN</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .hero-section {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 80px 0;
+        }
+        .feature-card {
+            border: none;
+            border-radius: 15px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
+        }
+        .feature-card:hover {
+            transform: translateY(-5px);
+        }
+        .upload-area {
+            border: 2px dashed #dee2e6;
+            border-radius: 10px;
+            padding: 40px;
+            text-align: center;
+            background-color: #f8f9fa;
+            transition: border-color 0.3s ease;
+        }
+        .upload-area:hover {
+            border-color: #667eea;
+        }
+        .upload-area.dragover {
+            border-color: #667eea;
+            background-color: #e3f2fd;
+        }
+        .progress-container {
+            display: none;
+        }
+        .log-container {
+            max-height: 300px;
+            overflow-y: auto;
+            background-color: #f8f9fa;
+            border-radius: 5px;
+            padding: 15px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+        }
+        .status-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+        .status-running {
+            background-color: #ffc107;
+            animation: pulse 1.5s infinite;
+        }
+        .status-completed {
+            background-color: #28a745;
+        }
+        .status-error {
+            background-color: #dc3545;
+        }
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="#">
+                <i class="fas fa-shield-alt me-2"></i>
+                Data Anonymization System
+            </a>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero-section">
+        <div class="container text-center">
+            <h1 class="display-4 mb-4">Secure Data Anonymization</h1>
+            <p class="lead mb-4">Protect patient privacy while maintaining data utility using advanced Conditional GAN technology</p>
+            <div class="row justify-content-center">
+                <div class="col-md-8">
+                    <div class="d-flex justify-content-center gap-3">
+                        <span class="badge bg-light text-dark fs-6">
+                            <i class="fas fa-lock me-2"></i>K-Anonymity
+                        </span>
+                        <span class="badge bg-light text-dark fs-6">
+                            <i class="fas fa-users me-2"></i>L-Diversity
+                        </span>
+                        <span class="badge bg-light text-dark fs-6">
+                            <i class="fas fa-chart-line me-2"></i>T-Closeness
+                        </span>
+                        <span class="badge bg-light text-dark fs-6">
+                            <i class="fas fa-robot me-2"></i>CGAN
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Main Content -->
+    <div class="container my-5">
+        <!-- Features Overview -->
+        <div class="row mb-5">
+            <div class="col-md-3 mb-4">
+                <div class="card feature-card h-100">
+                    <div class="card-body text-center">
+                        <i class="fas fa-upload fa-3x text-primary mb-3"></i>
+                        <h5 class="card-title">Data Upload</h5>
+                        <p class="card-text">Upload patient CSV files securely for processing</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 mb-4">
+                <div class="card feature-card h-100">
+                    <div class="card-body text-center">
+                        <i class="fas fa-user-secret fa-3x text-success mb-3"></i>
+                        <h5 class="card-title">Pseudonymization</h5>
+                        <p class="card-text">Replace direct identifiers with secure pseudonyms</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 mb-4">
+                <div class="card feature-card h-100">
+                    <div class="card-body text-center">
+                        <i class="fas fa-brain fa-3x text-info mb-3"></i>
+                        <h5 class="card-title">CGAN Generation</h5>
+                        <p class="card-text">Generate synthetic data using Conditional GANs</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 mb-4">
+                <div class="card feature-card h-100">
+                    <div class="card-body text-center">
+                        <i class="fas fa-chart-bar fa-3x text-warning mb-3"></i>
+                        <h5 class="card-title">Validation</h5>
+                        <p class="card-text">Comprehensive privacy and utility metrics</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Upload Section -->
+        <div class="row">
+            <div class="col-lg-8 mx-auto">
+                <div class="card">
+                    <div class="card-header bg-primary text-white">
+                        <h4 class="mb-0">
+                            <i class="fas fa-upload me-2"></i>
+                            Upload Patient Data
+                        </h4>
+                    </div>
+                    <div class="card-body">
+                        <form id="uploadForm" enctype="multipart/form-data">
+                            <div class="mb-3">
+                                <label for="file" class="form-label">Select CSV File</label>
+                                <div class="upload-area" id="uploadArea">
+                                    <i class="fas fa-cloud-upload-alt fa-3x text-muted mb-3"></i>
+                                    <h5>Drag & Drop your CSV file here</h5>
+                                    <p class="text-muted">or click to browse</p>
+                                    <input type="file" id="file" name="file" accept=".csv" class="d-none" required>
+                                    <button type="button" class="btn btn-outline-primary" onclick="document.getElementById('file').click()">
+                                        Browse Files
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="n_records" class="form-label">Number of Records to Process</label>
+                                <input type="number" class="form-control" id="n_records" name="n_records" 
+                                       value="2000" min="100" max="10000">
+                                <div class="form-text">Recommended: 1000-5000 records for optimal performance</div>
+                            </div>
+                            
+                            <div class="d-grid">
+                                <button type="submit" class="btn btn-primary btn-lg" id="uploadBtn">
+                                    <i class="fas fa-play me-2"></i>
+                                    Start Anonymization Pipeline
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Progress Section -->
+        <div class="progress-container mt-4" id="progressContainer">
+            <div class="row">
+                <div class="col-lg-8 mx-auto">
+                    <div class="card">
+                        <div class="card-header bg-info text-white">
+                            <h5 class="mb-0">
+                                <i class="fas fa-cogs me-2"></i>
+                                Pipeline Progress
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="mb-3">
+                                <div class="d-flex align-items-center mb-2">
+                                    <span class="status-indicator status-running" id="statusIndicator"></span>
+                                    <span class="fw-bold" id="currentStep">Initializing...</span>
+                                </div>
+                                <div class="progress">
+                                    <div class="progress-bar progress-bar-striped progress-bar-animated" 
+                                         role="progressbar" style="width: 0%" id="progressBar"></div>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <h6>Pipeline Logs:</h6>
+                                <div class="log-container" id="logContainer">
+                                    <div class="text-muted">Waiting for pipeline to start...</div>
+                                </div>
+                            </div>
+                            
+                            <div class="d-grid">
+                                <button class="btn btn-success" id="viewResultsBtn" style="display: none;">
+                                    <i class="fas fa-eye me-2"></i>
+                                    View Results
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-dark text-light py-4 mt-5">
+        <div class="container text-center">
+            <p class="mb-0">&copy; 2024 Data Anonymization System. Built with Flask and PyTorch.</p>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        let currentOutputDir = null;
+        let statusCheckInterval = null;
+
+        // File upload handling
+        const uploadArea = document.getElementById('uploadArea');
+        const fileInput = document.getElementById('file');
+
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.classList.add('dragover');
+        });
+
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.classList.remove('dragover');
+        });
+
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                fileInput.files = files;
+                updateFileDisplay(files[0]);
+            }
+        });
+
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                updateFileDisplay(e.target.files[0]);
+            }
+        });
+
+        function updateFileDisplay(file) {
+            const uploadArea = document.getElementById('uploadArea');
+            uploadArea.innerHTML = `
+                <i class="fas fa-file-csv fa-3x text-success mb-3"></i>
+                <h5>${file.name}</h5>
+                <p class="text-muted">Size: ${(file.size / 1024 / 1024).toFixed(2)} MB</p>
+                <button type="button" class="btn btn-outline-primary" onclick="document.getElementById('file').click()">
+                    Change File
+                </button>
+            `;
+        }
+
+        // Form submission
+        document.getElementById('uploadForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const formData = new FormData();
+            const file = fileInput.files[0];
+            const nRecords = document.getElementById('n_records').value;
+            
+            if (!file) {
+                alert('Please select a file to upload.');
+                return;
+            }
+            
+            formData.append('file', file);
+            formData.append('n_records', nRecords);
+            
+            try {
+                const response = await fetch('/upload', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    currentOutputDir = result.output_dir;
+                    showProgress();
+                    startStatusCheck();
+                } else {
+                    alert('Upload failed: ' + result.error);
+                }
+            } catch (error) {
+                alert('Upload failed: ' + error.message);
+            }
+        });
+
+        function showProgress() {
+            document.getElementById('progressContainer').style.display = 'block';
+            document.getElementById('uploadBtn').disabled = true;
+            document.getElementById('uploadBtn').innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Processing...';
+        }
+
+        function startStatusCheck() {
+            statusCheckInterval = setInterval(checkStatus, 2000);
+        }
+
+        async function checkStatus() {
+            try {
+                const response = await fetch('/status');
+                const status = await response.json();
+                
+                updateProgress(status);
+                
+                if (!status.running && status.error) {
+                    clearInterval(statusCheckInterval);
+                    showError(status.error);
+                } else if (!status.running && status.progress === 100) {
+                    clearInterval(statusCheckInterval);
+                    showCompleted();
+                }
+            } catch (error) {
+                console.error('Error checking status:', error);
+            }
+        }
+
+        function updateProgress(status) {
+            const progressBar = document.getElementById('progressBar');
+            const currentStep = document.getElementById('currentStep');
+            const logContainer = document.getElementById('logContainer');
+            const statusIndicator = document.getElementById('statusIndicator');
+            
+            progressBar.style.width = status.progress + '%';
+            progressBar.setAttribute('aria-valuenow', status.progress);
+            
+            if (status.current_step) {
+                currentStep.textContent = status.current_step;
+            }
+            
+            if (status.logs && status.logs.length > 0) {
+                logContainer.innerHTML = status.logs.map(log => `<div>${log}</div>`).join('');
+                logContainer.scrollTop = logContainer.scrollHeight;
+            }
+            
+            // Update status indicator
+            statusIndicator.className = 'status-indicator';
+            if (status.running) {
+                statusIndicator.classList.add('status-running');
+            } else if (status.error) {
+                statusIndicator.classList.add('status-error');
+            } else if (status.progress === 100) {
+                statusIndicator.classList.add('status-completed');
+            }
+        }
+
+        function showError(error) {
+            const statusIndicator = document.getElementById('statusIndicator');
+            const currentStep = document.getElementById('currentStep');
+            const viewResultsBtn = document.getElementById('viewResultsBtn');
+            
+            statusIndicator.className = 'status-indicator status-error';
+            currentStep.textContent = 'Pipeline failed';
+            viewResultsBtn.style.display = 'none';
+            
+            document.getElementById('uploadBtn').disabled = false;
+            document.getElementById('uploadBtn').innerHTML = '<i class="fas fa-play me-2"></i>Start Anonymization Pipeline';
+        }
+
+        function showCompleted() {
+            const statusIndicator = document.getElementById('statusIndicator');
+            const currentStep = document.getElementById('currentStep');
+            const viewResultsBtn = document.getElementById('viewResultsBtn');
+            
+            statusIndicator.className = 'status-indicator status-completed';
+            currentStep.textContent = 'Pipeline completed successfully!';
+            viewResultsBtn.style.display = 'block';
+            
+            document.getElementById('uploadBtn').disabled = false;
+            document.getElementById('uploadBtn').innerHTML = '<i class="fas fa-play me-2"></i>Start Anonymization Pipeline';
+        }
+
+        document.getElementById('viewResultsBtn').addEventListener('click', () => {
+            if (currentOutputDir) {
+                window.location.href = `/results/${currentOutputDir}`;
+            }
+        });
+    </script>
+</body>
+</html>

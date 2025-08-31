@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Anonymization Results - Data Anonymization System</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <style>
+        .metric-card {
+            border: none;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            transition: transform 0.2s ease;
+        }
+        .metric-card:hover {
+            transform: translateY(-2px);
+        }
+        .privacy-metric {
+            border-left: 4px solid #28a745;
+        }
+        .utility-metric {
+            border-left: 4px solid #007bff;
+        }
+        .dataset-card {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border: none;
+            border-radius: 15px;
+        }
+        .visualization-container {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+        .download-section {
+            background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+            border-radius: 15px;
+            padding: 30px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="/">
+                <i class="fas fa-shield-alt me-2"></i>
+                Data Anonymization System
+            </a>
+            <div class="navbar-nav ms-auto">
+                <a class="nav-link" href="/">
+                    <i class="fas fa-home me-1"></i>Home
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Header -->
+    <div class="container my-4">
+        <div class="row">
+            <div class="col-12">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h1 class="h2 mb-2">
+                            <i class="fas fa-chart-line text-primary me-2"></i>
+                            Anonymization Results
+                        </h1>
+                        <p class="text-muted mb-0">Output Directory: {{ output_dir }}</p>
+                    </div>
+                    <div class="text-end">
+                        <span class="badge bg-success fs-6">
+                            <i class="fas fa-check-circle me-1"></i>
+                            Pipeline Completed
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Dataset Overview -->
+    <div class="container mb-5">
+        <div class="row">
+            <div class="col-md-6 mb-4">
+                <div class="card dataset-card h-100">
+                    <div class="card-body text-center">
+                        <i class="fas fa-database fa-3x text-primary mb-3"></i>
+                        <h5 class="card-title">Processed Dataset</h5>
+                        {% if datasets.processed %}
+                            <p class="card-text">
+                                <strong>{{ datasets.processed.shape[0] }}</strong> records<br>
+                                <strong>{{ datasets.processed.shape[1] }}</strong> features<br>
+                                <small class="text-muted">{{ "%.2f"|format(datasets.processed.memory_usage(deep=True).sum() / 1024 / 1024) }} MB</small>
+                            </p>
+                        {% else %}
+                            <p class="card-text text-muted">No processed data available</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6 mb-4">
+                <div class="card dataset-card h-100">
+                    <div class="card-body text-center">
+                        <i class="fas fa-user-secret fa-3x text-success mb-3"></i>
+                        <h5 class="card-title">Pseudonymized Dataset</h5>
+                        {% if datasets.pseudonymized %}
+                            <p class="card-text">
+                                <strong>{{ datasets.pseudonymized.shape[0] }}</strong> records<br>
+                                <strong>{{ datasets.pseudonymized.shape[1] }}</strong> features<br>
+                                <small class="text-muted">{{ "%.2f"|format(datasets.pseudonymized.memory_usage(deep=True).sum() / 1024 / 1024) }} MB</small>
+                            </p>
+                        {% else %}
+                            <p class="card-text text-muted">No pseudonymized data available</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Privacy Metrics -->
+    {% if validation_results.privacy %}
+    <div class="container mb-5">
+        <h3 class="mb-4">
+            <i class="fas fa-shield-alt text-success me-2"></i>
+            Privacy Protection Metrics
+        </h3>
+        
+        <div class="row">
+            <!-- K-Anonymity -->
+            {% if validation_results.privacy.k_anonymity %}
+            <div class="col-md-6 mb-4">
+                <div class="card metric-card privacy-metric h-100">
+                    <div class="card-body">
+                        <h5 class="card-title">
+                            <i class="fas fa-users me-2"></i>
+                            K-Anonymity
+                        </h5>
+                        {% for k, result in validation_results.privacy.k_anonymity.items() %}
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span class="fw-bold">{{ k }}:</span>
+                            {% if result.achieved %}
+                                <span class="badge bg-success">
+                                    <i class="fas fa-check me-1"></i>Achieved
+                                </span>
+                            {% else %}
+                                <span class="badge bg-warning">
+                                    <i class="fas fa-exclamation-triangle me-1"></i>Not Achieved
+                                </span>
+                            {% endif %}
+                        </div>
+                        <small class="text-muted">
+                            Min group size: {{ result.min_group_size }}, 
+                            Total groups: {{ result.total_groups }}
+                        </small>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- L-Diversity -->
+            {% if validation_results.privacy.l_diversity %}
+            <div class="col-md-6 mb-4">
+                <div class="card metric-card privacy-metric h-100">
+                    <div class="card-body">
+                        <h5 class="card-title">
+                            <i class="fas fa-layer-group me-2"></i>
+                            L-Diversity
+                        </h5>
+                        {% for l, result in validation_results.privacy.l_diversity.items() %}
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span class="fw-bold">{{ l }}:</span>
+                            {% if result.achieved %}
+                                <span class="badge bg-success">
+                                    <i class="fas fa-check me-1"></i>Achieved
+                                </span>
+                            {% else %}
+                                <span class="badge bg-warning">
+                                    <i class="fas fa-exclamation-triangle me-1"></i>Not Achieved
+                                </span>
+                            {% endif %}
+                        </div>
+                        <small class="text-muted">
+                            {{ result.l_diverse_groups }}/{{ result.total_groups }} groups ({{ "%.1f"|format(result.ratio * 100) }}%)
+                        </small>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- T-Closeness -->
+            {% if validation_results.privacy.t_closeness %}
+            <div class="col-md-6 mb-4">
+                <div class="card metric-card privacy-metric h-100">
+                    <div class="card-body">
+                        <h5 class="card-title">
+                            <i class="fas fa-chart-line me-2"></i>
+                            T-Closeness
+                        </h5>
+                        {% for t, result in validation_results.privacy.t_closeness.items() %}
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span class="fw-bold">{{ t }}:</span>
+                            {% if result.achieved %}
+                                <span class="badge bg-success">
+                                    <i class="fas fa-check me-1"></i>Achieved
+                                </span>
+                            {% else %}
+                                <span class="badge bg-warning">
+                                    <i class="fas fa-exclamation-triangle me-1"></i>Not Achieved
+                                </span>
+                            {% endif %}
+                        </div>
+                        <small class="text-muted">
+                            {{ result.t_close_groups }}/{{ result.total_groups }} groups ({{ "%.1f"|format(result.ratio * 100) }}%)
+                        </small>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Re-identification Risk -->
+            {% if validation_results.privacy.reidentification_risk %}
+            <div class="col-md-6 mb-4">
+                <div class="card metric-card privacy-metric h-100">
+                    <div class="card-body">
+                        <h5 class="card-title">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            Re-identification Risk
+                        </h5>
+                        {% set risk = validation_results.privacy.reidentification_risk %}
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span class="fw-bold">Risk Level:</span>
+                            {% if risk.risk_level == 'LOW' %}
+                                <span class="badge bg-success">{{ risk.risk_level }}</span>
+                            {% elif risk.risk_level == 'MEDIUM' %}
+                                <span class="badge bg-warning">{{ risk.risk_level }}</span>
+                            {% else %}
+                                <span class="badge bg-danger">{{ risk.risk_level }}</span>
+                            {% endif %}
+                        </div>
+                        <small class="text-muted">
+                            {{ risk.unique_combinations }}/{{ risk.total_records }} unique combinations<br>
+                            ({{ "%.1f"|format(risk.uniqueness_ratio * 100) }}% uniqueness)
+                        </small>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Utility Metrics -->
+    {% if validation_results.utility %}
+    <div class="container mb-5">
+        <h3 class="mb-4">
+            <i class="fas fa-chart-bar text-primary me-2"></i>
+            Data Utility Metrics
+        </h3>
+        
+        <div class="row">
+            <!-- ML Performance -->
+            {% if validation_results.utility.ml_performance %}
+            <div class="col-md-6 mb-4">
+                <div class="card metric-card utility-metric h-100">
+                    <div class="card-body">
+                        <h5 class="card-title">
+                            <i class="fas fa-robot me-2"></i>
+                            Machine Learning Performance
+                        </h5>
+                        {% for model, result in validation_results.utility.ml_performance.items() %}
+                        <div class="mb-3">
+                            <h6 class="fw-bold">{{ result.model_name }}</h6>
+                            <div class="row">
+                                <div class="col-6">
+                                    <small class="text-muted">Original Accuracy:</small><br>
+                                    <strong>{{ "%.3f"|format(result.accuracy_original) }}</strong>
+                                </div>
+                                <div class="col-6">
+                                    <small class="text-muted">Synthetic Accuracy:</small><br>
+                                    <strong>{{ "%.3f"|format(result.accuracy_synthetic) }}</strong>
+                                </div>
+                            </div>
+                            <div class="mt-2">
+                                <small class="text-muted">Difference:</small>
+                                <span class="badge {% if result.utility_preserved %}bg-success{% else %}bg-warning{% endif %}">
+                                    {{ "%.3f"|format(result.accuracy_difference) }}
+                                </span>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Statistical Similarity -->
+            {% if validation_results.utility.statistical_similarity %}
+            <div class="col-md-6 mb-4">
+                <div class="card metric-card utility-metric h-100">
+                    <div class="card-body">
+                        <h5 class="card-title">
+                            <i class="fas fa-percentage me-2"></i>
+                            Statistical Similarity
+                        </h5>
+                        {% if validation_results.utility.statistical_similarity.overall %}
+                        {% set overall = validation_results.utility.statistical_similarity.overall %}
+                        <div class="text-center mb-3">
+                            <h3 class="text-primary">{{ "%.1f"|format(overall.similarity_score * 100) }}%</h3>
+                            <small class="text-muted">Overall Similarity Score</small>
+                        </div>
+                        <small class="text-muted">
+                            Based on {{ overall.columns_compared }} numerical features
+                        </small>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Visualizations -->
+    {% if visualizations %}
+    <div class="container mb-5">
+        <h3 class="mb-4">
+            <i class="fas fa-chart-area text-info me-2"></i>
+            Data Visualizations
+        </h3>
+        
+        <div class="row">
+            {% if visualizations.age_distribution %}
+            <div class="col-lg-6 mb-4">
+                <div class="visualization-container">
+                    <h6 class="mb-3">Age Distribution Comparison</h6>
+                    <div id="ageDistribution"></div>
+                </div>
+            </div>
+            {% endif %}
+            
+            {% if visualizations.gender_distribution %}
+            <div class="col-lg-6 mb-4">
+                <div class="visualization-container">
+                    <h6 class="mb-3">Gender Distribution Comparison</h6>
+                    <div id="genderDistribution"></div>
+                </div>
+            </div>
+            {% endif %}
+            
+            {% if visualizations.expenses_comparison %}
+            <div class="col-lg-6 mb-4">
+                <div class="visualization-container">
+                    <h6 class="mb-3">Healthcare Expenses Comparison</h6>
+                    <div id="expensesComparison"></div>
+                </div>
+            {% endif %}
+            
+            {% if visualizations.k_anonymity %}
+            <div class="col-lg-6 mb-4">
+                <div class="visualization-container">
+                    <h6 class="mb-3">K-Anonymity Results</h6>
+                    <div id="kAnonymity"></div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Download Section -->
+    <div class="container mb-5">
+        <div class="download-section">
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <h4 class="mb-2">
+                        <i class="fas fa-download me-2"></i>
+                        Download Results
+                    </h4>
+                    <p class="mb-0 text-muted">Download the processed and anonymized datasets for further analysis</p>
+                </div>
+                <div class="col-md-4 text-end">
+                    <div class="d-grid gap-2">
+                        <a href="/download/{{ output_dir }}/processed" class="btn btn-primary">
+                            <i class="fas fa-download me-2"></i>Processed Data
+                        </a>
+                        <a href="/download/{{ output_dir }}/pseudonymized" class="btn btn-success">
+                            <i class="fas fa-download me-2"></i>Pseudonymized Data
+                        </a>
+                        <a href="/download/{{ output_dir }}/validation" class="btn btn-info">
+                            <i class="fas fa-download me-2"></i>Validation Results
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-dark text-light py-4">
+        <div class="container text-center">
+            <p class="mb-0">&copy; 2024 Data Anonymization System. Built with Flask and PyTorch.</p>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Render Plotly visualizations
+        {% if visualizations.age_distribution %}
+        Plotly.newPlot('ageDistribution', JSON.parse('{{ visualizations.age_distribution | safe }}'));
+        {% endif %}
+        
+        {% if visualizations.gender_distribution %}
+        Plotly.newPlot('genderDistribution', JSON.parse('{{ visualizations.gender_distribution | safe }}'));
+        {% endif %}
+        
+        {% if visualizations.expenses_comparison %}
+        Plotly.newPlot('expensesComparison', JSON.parse('{{ visualizations.expenses_comparison | safe }}'));
+        {% endif %}
+        
+        {% if visualizations.k_anonymity %}
+        Plotly.newPlot('kAnonymity', JSON.parse('{{ visualizations.k_anonymity | safe }}'));
+        {% endif %}
+    </script>
+</body>
+</html>
