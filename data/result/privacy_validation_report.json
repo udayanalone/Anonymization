@@ -1,0 +1,135 @@
+{
+  "k_anonymity": {
+    "k=2": {
+      "achieved": "False",
+      "min_group_size": 1,
+      "max_group_size": 2,
+      "total_groups": 999,
+      "groups_meeting_k": 1,
+      "groups_below_k": 998,
+      "percentage_meeting_k": 0.1
+    },
+    "k=3": {
+      "achieved": "False",
+      "min_group_size": 1,
+      "max_group_size": 2,
+      "total_groups": 999,
+      "groups_meeting_k": 0,
+      "groups_below_k": 999,
+      "percentage_meeting_k": 0.0
+    },
+    "k=5": {
+      "achieved": "False",
+      "min_group_size": 1,
+      "max_group_size": 2,
+      "total_groups": 999,
+      "groups_meeting_k": 0,
+      "groups_below_k": 999,
+      "percentage_meeting_k": 0.0
+    },
+    "k=10": {
+      "achieved": "False",
+      "min_group_size": 1,
+      "max_group_size": 2,
+      "total_groups": 999,
+      "groups_meeting_k": 0,
+      "groups_below_k": 999,
+      "percentage_meeting_k": 0.0
+    },
+    "k=20": {
+      "achieved": "False",
+      "min_group_size": 1,
+      "max_group_size": 2,
+      "total_groups": 999,
+      "groups_meeting_k": 0,
+      "groups_below_k": 999,
+      "percentage_meeting_k": 0.0
+    }
+  },
+  "l_diversity": {
+    "l=2": {
+      "l_diverse_groups": 0,
+      "total_groups": 999,
+      "percentage_l_diverse": 0.0,
+      "average_diversity_per_attribute": {
+        "HEALTHCARE_EXPENSES": 1.0,
+        "HEALTHCARE_COVERAGE": 1.0,
+        "MARITAL": 0.69,
+        "BIRTHPLACE": 0.0
+      }
+    },
+    "l=3": {
+      "l_diverse_groups": 0,
+      "total_groups": 999,
+      "percentage_l_diverse": 0.0,
+      "average_diversity_per_attribute": {
+        "HEALTHCARE_EXPENSES": 1.0,
+        "HEALTHCARE_COVERAGE": 1.0,
+        "MARITAL": 0.69,
+        "BIRTHPLACE": 0.0
+      }
+    },
+    "l=5": {
+      "l_diverse_groups": 0,
+      "total_groups": 999,
+      "percentage_l_diverse": 0.0,
+      "average_diversity_per_attribute": {
+        "HEALTHCARE_EXPENSES": 1.0,
+        "HEALTHCARE_COVERAGE": 1.0,
+        "MARITAL": 0.69,
+        "BIRTHPLACE": 0.0
+      }
+    }
+  },
+  "t_closeness": {
+    "t=0.1": {
+      "t_close_groups": 0,
+      "total_groups": 999,
+      "percentage_t_close": 0.0,
+      "average_closeness_per_attribute": {
+        "HEALTHCARE_EXPENSES": 0.499,
+        "HEALTHCARE_COVERAGE": 0.499,
+        "MARITAL": 0.424,
+        "BIRTHPLACE": 1.0
+      }
+    },
+    "t=0.2": {
+      "t_close_groups": 0,
+      "total_groups": 999,
+      "percentage_t_close": 0.0,
+      "average_closeness_per_attribute": {
+        "HEALTHCARE_EXPENSES": 0.499,
+        "HEALTHCARE_COVERAGE": 0.499,
+        "MARITAL": 0.424,
+        "BIRTHPLACE": 1.0
+      }
+    },
+    "t=0.3": {
+      "t_close_groups": 0,
+      "total_groups": 999,
+      "percentage_t_close": 0.0,
+      "average_closeness_per_attribute": {
+        "HEALTHCARE_EXPENSES": 0.499,
+        "HEALTHCARE_COVERAGE": 0.499,
+        "MARITAL": 0.424,
+        "BIRTHPLACE": 1.0
+      }
+    }
+  },
+  "reidentification_risk": {
+    "total_records": 1000,
+    "unique_combinations": 999,
+    "single_records": 998,
+    "small_groups_1_3": 999,
+    "medium_groups_4_10": 0,
+    "large_groups_10_plus": 0,
+    "single_record_risk_percentage": 99.8,
+    "small_group_risk_percentage": 99.9,
+    "overall_risk_level": "HIGH"
+  },
+  "summary": {
+    "timestamp": "2025-09-03T23:55:44.099629",
+    "dataset_size": 1000,
+    "validation_metrics": "k-anonymity, l-diversity, t-closeness, reidentification_risk"
+  }
+}
